@@ -1,7 +1,6 @@
-import { test, expect, assert } from "vitest"
-
-import { type VElement, h, VNode } from "./h"
-import { describe } from "node:test"
+import { describe, test, expect, assert } from "vitest"
+import { type VElement, type VText, h } from "./h"
+import { _notNull } from "./arrays"
 
 /**
  * Virtual Element which resembles the following HTML structure (i.e., form DOM element with its children).
@@ -40,18 +39,18 @@ describe("h", () => {
         expect(formEl).toEqual(expectedRes);
     })
 
-    function createVElement(tag: string, props: {}, children?: (string | VElement)[]) {
+    function createVElement(tag: string, props: {}, children?: (string | VElement | null)[]) {
         const el = h(tag, props, children)
 
-        let expChildren: VNode[] = []
+        let expChildren: (VElement | VText)[] = []
 
         if (children) {
-            expChildren = children.filter(c => c != null).map(child => {
-                return (typeof child === "string") ? { type: "text", value: child } : child
+            expChildren = children.filter(_notNull).map(child => {
+                return (typeof child === "string") ? { type: "text", value: child } as const : child
             })
         }
 
-        const expected = { type: "element", tag, props, children: expChildren }
+        const expected = { type: "element", tag, props, children: expChildren } as const
 
         assert.deepEqual(el, expected, `Child of type ${tag}`)
 
