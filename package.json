@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Frontend Framework",
   "scripts": {
-    "serve": "npx http-server . -o ./examples/",
+    "serve:old": "npx http-server . -o ./examples/",
+    "serve": "vite",
     "test": "vitest"
   },
   "keywords": [],
@@ -11,6 +12,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.12.10",
+    "vite": "^5.2.11",
     "vitest": "^1.6.0"
   }
 }
