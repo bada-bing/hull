@@ -1,13 +1,15 @@
 import { withoutNulls } from "./arrays";
+import { Listeners } from "./mount-dom";
 
-const VDOM_TYPES = {
+export const VDOM_TYPES = {
     TEXT: "text",
     ELEMENT: "element",
     FRAGMENT: "fragment"
 } as const;
 
-
 export interface VElement {
+    el?: HTMLElement,
+    listeners?: Listeners,
     tag: string,
     props: {},
     children: VNode[],
@@ -15,11 +17,13 @@ export interface VElement {
 }
 
 export interface VText {
+    el?: Text,
     type: typeof VDOM_TYPES["TEXT"]
     value: string
 }
 
-interface VFragment {
+export interface VFragment {
+    el?: HTMLElement,
     type: typeof VDOM_TYPES["FRAGMENT"]
     children: VNode[]
 }

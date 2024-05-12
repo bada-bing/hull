@@ -1,0 +1,8 @@
+{
+    "compilerOptions": {
+        "strictNullChecks": true,
+        "types": [
+            "node"
+        ]
+    }
+}
