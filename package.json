@@ -1,0 +1,16 @@
+{
+  "name": "hull",
+  "version": "1.0.0",
+  "description": "Frontend Framework",
+  "scripts": {
+    "serve": "npx http-server . -o ./examples/",
+    "test": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.12.10",
+    "vitest": "^1.6.0"
+  }
+}
