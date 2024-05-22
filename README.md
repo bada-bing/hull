@@ -2,8 +2,8 @@
 
 Frontend Framework
 
-TODO setup prettier
 TODO [Optional] setup deno
+
 
 ## Tech Stack
 
