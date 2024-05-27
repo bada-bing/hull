@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "strictNullChecks": true,
-    "types": ["node"]
+    "types": ["node"],
+    "target": "ES2015"
   }
 }
