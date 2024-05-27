@@ -1,27 +1,34 @@
-// Generate App Component and mount it to body
+import { h } from "../src/runtime/h";
+import { CreateAppParams, createApp } from "../src/runtime/app";
 
-import { VText, h } from "../src/runtime/h";
-import { mountDOM } from "../src/runtime/mount-dom";
+const todosView: CreateAppParams["view"] = (state, emit) => {
+  const component = h("section", {}, [
+    h("h1", {}, ["My Blog"]),
+    h("p", {}, ["Welcome to My Blog!"]),
+    h(
+      "button",
+      {
+        on: {
+          click: () => {
+            console.log("clicked the button and liked it");
+            emit("click", "test-button");
+          },
+        },
+      },
+      ["click me"],
+    ),
+  ]);
 
-/**
- * section
- * h1 My Blog
- * Welcome to My Blog
- */
-
-const output = h("section", {}, [
-  h("h1", {}, ["My Blog"]),
-  h("p", {}, ["Welcome to My Blog!"]),
-]);
-
-const textExample: VText = {
-  type: "text",
-  value: "an examplary text to be shown on the screen",
+  return component;
 };
 
+// Generate App Component and mount it to body
+
+const app = createApp({
+  state: {},
+  view: todosView,
+  reducers: {},
+});
+
 let bodyElement = document.body as HTMLBodyElement;
-const div = document.createElement("div");
-div.textContent = "what' up, little dog";
-bodyElement.appendChild(div);
-mountDOM(textExample, bodyElement);
-mountDOM(output, bodyElement);
+app.mount(bodyElement);
