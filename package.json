@@ -3,10 +3,8 @@
   "version": "1.0.0",
   "description": "Frontend Framework",
   "scripts": {
-    "serve:old": "npx http-server . -o ./examples/",
     "serve": "vite",
-    "test": "vitest",
-    "lint": "prettier"
+    "test": "vitest"
   },
   "keywords": [],
   "author": "",

@@ -2,6 +2,8 @@
   "compilerOptions": {
     "strictNullChecks": true,
     "types": ["node"],
-    "target": "ES2015"
+    "target": "ES2015",
+    "module": "ESNext",
+    "moduleResolution": "bundler"
   }
 }
