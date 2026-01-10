@@ -1,11 +1,95 @@
 import { describe, test, expect, assert } from "vitest";
-import { type VElement, type VText, h } from "./h";
+import {
+  type VElement,
+  VFragment,
+  type VText,
+  h,
+  hFragment,
+  hString,
+  mapStringsToTextNodes,
+} from "./h";
 import { _notNull } from "./arrays";
 
+// Ch3 - rendering and the virtual DOM
+describe("Rendering and the Virtual DOM (Ch_3)", () => {
+  describe("Element Nodes - h() (Ch_3.5)", () => {
+    test("should map strings to Text Nodes - mapStringsToTextNodes() (Ch_3.5.2)", () => {
+      const childElNode: VElement = {
+        type: "element",
+        tag: "div",
+        props: {},
+        children: [],
+      };
+      const mappedArray = mapStringsToTextNodes([
+        null,
+        "text_a",
+        childElNode,
+        "text_b",
+      ]);
+      expect(mappedArray).toEqual([
+        null,
+        {
+          type: "text",
+          value: "text_a",
+        },
+        childElNode,
+        {
+          type: "text",
+          value: "text_b",
+        },
+      ]);
+    });
+  });
+
+  describe("Text Nodes - hString() (Ch_3.6)", () => {
+    test("should create VText", () => {
+      const vTextNode: VText = hString("login button");
+      const expected: VText = {
+        type: "text",
+        value: "login button",
+      };
+    });
+  });
+
+  describe("Fragment Nodes - hFragment() (Ch_3.7)", () => {
+    test("should create VFragment", () => {
+      const imgElement: VElement = {
+        type: "element",
+        tag: "img",
+        props: {
+          width: 30,
+        },
+        children: [],
+      };
+      const vFragmentNode: VFragment = hFragment([
+        "caption_text",
+        imgElement,
+        null,
+      ]);
+
+      expect(vFragmentNode).toEqual({
+        type: "fragment",
+        children: [
+          {
+            type: "text",
+            value: "caption_text",
+          },
+          imgElement,
+        ],
+      });
+    });
+  });
+});
+
 /**
- * Virtual Element which resembles the following HTML structure (i.e., form DOM element with its children).
+ * expectedRes is a Virtual Element which resembles the following HTML structure (i.e., form DOM element with its children)
  *
- * h() function should ensure that such VElement is created.
+ * It describes:
+ * - what nodes are in the tree and their attributes
+ * - the hierarchy of the nodes in the tree
+ * - the relative position of the nodes in the tree
+ *
+ * h() function should ensure that such VElement is created
  *
  * @example
  * <form class="login-form" action="login">
@@ -40,53 +124,25 @@ const expectedRes: VElement = {
   ],
 };
 
-describe("h", () => {
+// Ch 3.8 Components: the cornerstone of frontend frameworks
+// The most important test of the chapter, since it a complex case of creating a vdom node
+describe("Components - h() (Ch_3.8)", () => {
   let inputUser: VElement;
   let inputPass: VElement;
   let buttonLogIn: VElement;
 
   test("should create form VElement with its children and props", () => {
-    inputUser = createVElement("input", { type: "text", name: "user" });
-    inputPass = createVElement("input", { type: "text", name: "pass" });
-    buttonLogIn = createVElement("button", { on: { click: "login" } }, [
-      "Log in",
-    ]);
+    inputUser = h("input", { type: "text", name: "user" });
+    inputPass = h("input", { type: "text", name: "pass" });
+    buttonLogIn = h("button", { on: { click: "login" } }, ["Log in"]);
 
-    const formEl = createVElement(
-      "form",
-      { class: "login-form", action: "login" },
-      [inputUser, inputPass, null, buttonLogIn],
-    );
+    const formEl = h("form", { class: "login-form", action: "login" }, [
+      inputUser,
+      inputPass,
+      null,
+      buttonLogIn,
+    ]);
 
     expect(formEl).toEqual(expectedRes);
   });
-
-  function createVElement(
-    tag: string,
-    props: {},
-    children?: (string | VElement | null)[],
-  ) {
-    const el = h(tag, props, children);
-
-    let expChildren: (VElement | VText)[] = [];
-
-    if (children) {
-      expChildren = children.filter(_notNull).map((child) => {
-        return typeof child === "string"
-          ? ({ type: "text", value: child } as const)
-          : child;
-      });
-    }
-
-    const expected = {
-      type: "element",
-      tag,
-      props,
-      children: expChildren,
-    } as const;
-
-    assert.deepEqual(el, expected, `Child of type ${tag}`);
-
-    return el;
-  }
 });

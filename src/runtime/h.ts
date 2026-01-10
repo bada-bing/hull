@@ -1,6 +1,7 @@
 import { withoutNulls } from "./arrays";
 import { Listeners } from "./mount-dom";
 
+// types of Virtual Nodes
 export const VDOM_TYPES = {
   TEXT: "text",
   ELEMENT: "element",
@@ -31,11 +32,23 @@ export interface VFragment {
 export type VNode = VElement | VText | VFragment;
 
 /**
- * Create vnode element (virtual node)
  *
- * h is short for hyperscript -> a script that creates hypertext
- * essentially this function serves a similar purpose as HTML markup,
- * and that is to create structure which can be used to generate DOM
+ * Create a `virtual DOM element` node.
+ *
+ * h is short for hyperscript, a script that creates hypertext
+ *
+ * Produces a VElement representing an element of the given tag.
+ * String children are converted to text-node VElements and null children are filtered out.
+ *
+ * This function serves a similar purpose as HTML markup,
+ * and that is to create a structure which can be used to generate DOM
+ *
+ * @param tag - The element tag name (e.g. "div", "span") or a custom element identifier.
+ * @param props - A plain object of element properties and attributes to attach to the element.
+ *                This typically includes DOM attributes, element-specific properties,
+ *                style objects, dataset entries, and event handler functions.
+ * @param children - An array of child nodes, each of which may be a string (will be converted
+ *                   to a text node), a VElement, or null. Null entries are removed (default: `[]`).
  */
 export function h(
   tag: string,
@@ -50,20 +63,20 @@ export function h(
   };
 }
 
-function hString(text: string): VText {
+export function hString(text: string): VText {
   return {
     type: VDOM_TYPES.TEXT,
     value: text,
   };
 }
 
-function mapStringsToTextNodes(
+export function mapStringsToTextNodes(
   nodes: (string | VElement | null)[],
 ): (VText | VElement | null)[] {
   return nodes.map((n) => (typeof n === "string" ? hString(n) : n));
 }
 
-function hFragment(nodes: (string | VElement | null)[]): VFragment {
+export function hFragment(nodes: (string | VElement | null)[]): VFragment {
   return {
     type: VDOM_TYPES.FRAGMENT,
     children: withoutNulls(mapStringsToTextNodes(nodes)),
