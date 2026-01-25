@@ -11,6 +11,10 @@ export function mountDOM(vdom: VNode, parentEl: HTMLElement) {
     case "fragment":
       createFragmentNode(vdom, parentEl);
       break;
+    default:
+      // exhaustiveness checking ensures that all vdom.type options are covered
+      const _exhaustive: never = vdom;
+      throw new Error(`Unhandled vdom type: ${_exhaustive}`);
   }
 }
 
@@ -87,10 +91,9 @@ export function removeEventListeners(listeners: Listeners, domel: EventTarget) {
 type CSSText = string; // e.g., 'color: red; font-family: Georgia;'
 
 function setAttributes(attributes: Attributes, domel: HTMLElement): void {
-  const { classList, style, ...otherAttributes } = attributes;
+  const { class: classList, style, ...otherAttributes } = attributes;
 
   if (classList) {
-    // what happens if classList is an empty array?
     if (Array.isArray(classList)) {
       domel.classList.add(...classList);
     } else {
