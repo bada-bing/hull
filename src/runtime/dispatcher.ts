@@ -1,9 +1,18 @@
-type UnsubscribeFn = Function;
+export type ApplicationCommand = string;
+
+export type Reducer<State, Payload = unknown> = (
+  applicationState: Readonly<State>,
+  payload: Payload,
+) => State;
 
 /**
  * Handlers are wrapper functions around reducers functions which change the state
+ * They are consumers: they consume the payload of an application command
+ * They return nothing, but they do mutate the application state
  */
-type Handler = Function;
+type Handler<T = unknown> = (payload: T) => void;
+type AfterCommandHandler = Function;
+export type UnsubscribeFn = Function;
 
 /**
  * Dispatcher connects the application commands with consumer handler functions
@@ -13,12 +22,16 @@ type Handler = Function;
  *
  */
 export class Dispatcher {
-  #subscriptions = new Map<string, Handler[]>();
-  #afterHandlers: Handler[] = [];
+  // # is used in JS (ES2020) for private properties.
+  // In comparison to TS's `private` access modifier it stays private in runtime as well.
+
+  #subscriptions = new Map<ApplicationCommand, Handler[]>();
+  // after-command handlers run after all consumers of a command run
+  #afterCommandHandlers: AfterCommandHandler[] = [];
 
   subscribe(
     applicationCommand: ApplicationCommand,
-    handler: Function,
+    handler: Handler,
   ): UnsubscribeFn {
     if (!this.#subscriptions.has(applicationCommand)) {
       this.#subscriptions.set(applicationCommand, []);
@@ -27,7 +40,8 @@ export class Dispatcher {
     const handlers = this.#subscriptions.get(applicationCommand) as Handler[];
 
     if (handlers.includes(handler)) {
-      // if consumer handler is already registered create fake unsubscribe fn
+      // if consumer handler is already registered create empty unsubscribe fn
+      // we do this to avoid unexpected behavior if the application code tries to unregister the same handler multiple times
       return () => {};
     } else {
       handlers.push(handler);
@@ -40,16 +54,17 @@ export class Dispatcher {
     }
   }
 
-  registerAfterHandler(handler: Function): UnsubscribeFn {
-    this.#afterHandlers.push(handler);
+  // afterEveryCommand
+  registerAfterHandler(handler: AfterCommandHandler): UnsubscribeFn {
+    this.#afterCommandHandlers.push(handler);
 
     return () => {
-      const idx = this.#afterHandlers.indexOf(handler);
-      this.#afterHandlers.splice(idx, 1);
+      const idx = this.#afterCommandHandlers.indexOf(handler);
+      this.#afterCommandHandlers.splice(idx, 1);
     };
   }
 
-  dispatch(commandName: string, payload: unknown) {
+  dispatch(commandName: ApplicationCommand, payload: unknown) {
     if (this.#subscriptions.has(commandName) == false) {
       throw new Error(`unknown application command: ${commandName}`);
     }
@@ -60,10 +75,8 @@ export class Dispatcher {
       h(payload);
     });
 
-    this.#afterHandlers.forEach((h) => {
+    this.#afterCommandHandlers.forEach((h) => {
       h();
     });
   }
 }
-
-type ApplicationCommand = string;
