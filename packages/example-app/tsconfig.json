@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "dist",
+    "strictNullChecks": true,
+    "types": ["node"],
+    "target": "ES2015",
+    "module": "ESNext",
+    "moduleResolution": "bundler"
+  },
+  "include": ["examples"],
+  "references": [{ "path": "../framework" }]
+}
