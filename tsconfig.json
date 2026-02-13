@@ -1,9 +1,7 @@
 {
-  "compilerOptions": {
-    "strictNullChecks": true,
-    "types": ["node"],
-    "target": "ES2015",
-    "module": "ESNext",
-    "moduleResolution": "bundler"
-  }
+  "files": [],
+  "references": [
+    { "path": "packages/framework" },
+    { "path": "packages/example-app" }
+  ]
 }

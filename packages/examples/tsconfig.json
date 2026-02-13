@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "dist",
+    "strictNullChecks": true,
+    "types": ["node"],
+    "target": "ES2015",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@hull/framework/*": ["../framework/src/*"]
+    }
+  },
+  "include": ["."],
+  "references": [{ "path": "../framework" }]
+}
