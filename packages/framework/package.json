@@ -1,0 +1,17 @@
+{
+  "name": "@hull/framework",
+  "version": "1.0.0",
+  "description": "The Hull Framework",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.12.10",
+    "vitest": "^1.6.0",
+    "happy-dom": "^20.1.0"
+  }
+}

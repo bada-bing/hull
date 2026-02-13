@@ -1,19 +1,18 @@
 {
   "name": "hull",
+  "private": true,
   "version": "1.0.0",
   "description": "Frontend Framework",
   "scripts": {
-    "serve": "vite",
-    "test": "vitest"
+    "serve": "pnpm --filter @hull/example-app start",
+    "test": "pnpm --filter @hull/framework test",
+    "typecheck": "tsc --build --noEmit"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "^20.12.10",
-    "prettier": "^3.2.5",
-    "vite": "^5.2.11",
-    "vitest": "^1.6.0",
-    "happy-dom": "^20.1.0"
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   }
 }
