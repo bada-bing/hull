@@ -1,7 +1,10 @@
-import { h } from "../src/runtime/h";
-import { CreateAppParams, createApp } from "../src/runtime/app";
+import { h } from "@hull/framework/runtime/h";
+import { CreateAppParams, createApp } from "@hull/framework/runtime/app";
 
-const todosView: CreateAppParams["view"] = (state, emit) => {
+type ApplicationState = {}
+type CreateTodoAppParams = CreateAppParams<ApplicationState>
+
+const todosView: CreateTodoAppParams["view"] = (state, emit) => {
   const component = h("section", {}, [
     h("h1", {}, ["My Blog"]),
     h("p", {}, ["Welcome to My Blog!"]),
