@@ -1,4 +1,4 @@
-import { withoutNulls } from "./arrays";
+import { withoutNullsOrUndefines } from "./arrays";
 import { Listeners } from "./mount-dom";
 
 // types of Virtual Nodes
@@ -59,7 +59,7 @@ export function h(
     type: VDOM_TYPES.ELEMENT,
     tag,
     props,
-    children: withoutNulls(mapStringsToTextNodes(children)),
+    children: withoutNullsOrUndefines(mapStringsToTextNodes(children)),
   };
 }
 
@@ -79,6 +79,6 @@ export function mapStringsToTextNodes(
 export function hFragment(nodes: (string | VElement | null)[]): VFragment {
   return {
     type: VDOM_TYPES.FRAGMENT,
-    children: withoutNulls(mapStringsToTextNodes(nodes)),
+    children: withoutNullsOrUndefines(mapStringsToTextNodes(nodes)),
   };
 }
