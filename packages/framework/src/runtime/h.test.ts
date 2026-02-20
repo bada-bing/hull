@@ -1,4 +1,4 @@
-import { describe, test, expect, assert } from "vitest";
+import { describe, test, expect } from "vitest";
 import {
   type VElement,
   VFragment,
@@ -8,7 +8,6 @@ import {
   hString,
   mapStringsToTextNodes,
 } from "./h";
-import { _notNull } from "./arrays";
 
 // Ch3 - rendering and the virtual DOM
 describe("Rendering and the Virtual DOM (Ch_3)", () => {
