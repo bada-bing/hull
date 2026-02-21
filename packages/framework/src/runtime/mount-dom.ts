@@ -1,15 +1,35 @@
 import { VElement, VFragment, VNode, VText } from "./h";
 
-export function mountDOM(vdom: VNode, parentEl: HTMLElement) {
+export function insert(
+  el: HTMLElement | Text,
+  parent: HTMLElement,
+  index?: number,
+): void {
+  if (index == null || index == undefined) {
+    parent.append(el);
+    return;
+  }
+
+  if (index < 0)
+    throw new Error(`Index must be a positive integer, got ${index}`);
+
+  if (index >= parent.childNodes.length) {
+    parent.append(el);
+  } else {
+    parent.insertBefore(el, parent.childNodes[index]);
+  }
+}
+
+export function mountDOM(vdom: VNode, parentEl: HTMLElement, index?: number) {
   switch (vdom.type) {
     case "text":
-      createTextNode(vdom, parentEl);
+      createTextNode(vdom, parentEl, index);
       break;
     case "element":
-      createElementNode(vdom, parentEl);
+      createElementNode(vdom, parentEl, index);
       break;
     case "fragment":
-      createFragmentNode(vdom, parentEl);
+      createFragmentNode(vdom, parentEl, index);
       break;
     default:
       // exhaustiveness checking ensures that all vdom.type options are covered
@@ -18,14 +38,18 @@ export function mountDOM(vdom: VNode, parentEl: HTMLElement) {
   }
 }
 
-function createTextNode(vdom: VText, parentEl: HTMLElement) {
+function createTextNode(vdom: VText, parentEl: HTMLElement, index?: number) {
   const textNode = document.createTextNode(vdom.value);
   vdom.el = textNode;
 
-  parentEl.append(textNode);
+  insert(vdom.el, parentEl, index);
 }
 
-function createElementNode(vEl: VElement, parentEl: HTMLElement) {
+function createElementNode(
+  vEl: VElement,
+  parentEl: HTMLElement,
+  index?: number,
+) {
   const el = document.createElement(vEl.tag);
 
   addProps(el, vEl.props, vEl);
@@ -34,13 +58,26 @@ function createElementNode(vEl: VElement, parentEl: HTMLElement) {
 
   vEl.el = el;
 
-  parentEl.appendChild(el);
+  insert(vEl.el, parentEl, index);
 }
 
-function createFragmentNode(vdom: VFragment, parentEl: HTMLElement) {
+function createFragmentNode(
+  vdom: VFragment,
+  parentEl: HTMLElement,
+  index: number,
+) {
   // https://developer.mozilla.org/en-US/docs/Web/API/Document/createDocumentFragment
   vdom.el = parentEl;
-  vdom.children.forEach((child) => mountDOM(child, parentEl));
+
+  // each child has offset
+
+  vdom.children.forEach((child, offset) =>
+    mountDOM(
+      child,
+      parentEl,
+      index !== null && index !== undefined ? index + offset : undefined,
+    ),
+  );
 }
 
 type Attributes = Record<string, string> & {
