@@ -1,8 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { h, VElement, VFragment, VText } from "./h";
-import { Listeners, mountDOM } from "./mount-dom";
-import { assert } from "console";
-import { destroyDOM } from "./destroy-dom";
+import { h, hString, VElement, VFragment, VText } from "./h";
+import { Listeners, mountDOM, insert } from "./mount-dom";
 
 // Ch4 - Mounting the virtual DOM
 describe("Mounting virtual DOM (Ch_4.1)", () => {
@@ -152,5 +150,117 @@ describe("Mounting virtual DOM (Ch_4.1)", () => {
     expect(vInput.el?.style.border).toBe("1px solid red");
     expect(vInput.el?.className).toBe("customInput thickBorder");
     expect(vInput.el?.classList.length).toBe(2);
+  });
+});
+
+describe("Mounting the DOM at an index (Ch_8.1)", () => {
+  describe("insert() (Ch_8.1.1)", () => {
+    it("inserts an element at a given index", () => {
+      const parent = document.createElement("div");
+      const firstChild = document.createElement("p");
+      const lastChild = document.createElement("p");
+      parent.append(firstChild, lastChild);
+
+      const middleChild = document.createElement("span");
+      insert(middleChild, parent, 1);
+
+      expect(parent.childNodes.length).toBe(3);
+      expect(parent.childNodes[0]).toBe(firstChild);
+      expect(parent.childNodes[1]).toBe(middleChild);
+      expect(parent.childNodes[2]).toBe(lastChild);
+    });
+
+    it("appends an element if no index is provided", () => {
+      const parent = document.createElement("div");
+      const p1 = document.createElement("p");
+      parent.append(p1);
+
+      const el = document.createElement("span");
+      insert(el, parent);
+
+      expect(parent.childNodes.length).toBe(2);
+      expect(parent.childNodes[0]).toBe(p1);
+      expect(parent.childNodes[1]).toBe(el);
+    });
+
+    it("appends an element if index is out of bounds", () => {
+      const parent = document.createElement("div");
+      const p1 = document.createElement("p");
+      parent.append(p1);
+
+      const el = document.createElement("span");
+      insert(el, parent, 100);
+
+      expect(parent.childNodes.length).toBe(2);
+      expect(parent.childNodes[0]).toBe(p1);
+      expect(parent.childNodes[1]).toBe(el);
+    });
+
+    it("throws an error for a negative index", () => {
+      const parent = document.createElement("div");
+      const el = document.createElement("span");
+
+      expect(() => insert(el, parent, -1)).toThrow();
+    });
+  });
+
+  describe("mountDOM()", ()=>{
+    it("mounts a string vnode at a specific index (Ch_8.1.2)", () => {
+      const parent = document.createElement("div");
+      parent.append("world!");
+
+      const textVNode = hString("hello, ");
+      mountDOM(textVNode, parent, 0);
+
+      // Verify the 'el' property is set correctly on the vnode
+      expect(textVNode.el).toBe(parent.childNodes[0]);
+      expect(textVNode.el?.nodeType).toBe(Node.TEXT_NODE);
+
+      // Verify the content and order of all child nodes
+      const childNodeContents = Array.from(parent.childNodes).map(
+        (node) => node.textContent,
+      );
+      expect(childNodeContents).toEqual(["hello, ", "world!"]);
+    });
+
+    it("mounts an element vnode at a specific index (Ch_8.1.3)", () => {
+      const parent = document.createElement("div");
+      const initialChild = document.createElement("p");
+      parent.append(initialChild);
+
+      const vEl = h("span", {}, ["hello"]);
+      mountDOM(vEl, parent, 0);
+
+      expect(parent.childNodes.length).toBe(2);
+      expect(parent.childNodes[0]).toBe(vEl.el);
+      expect(parent.childNodes[1]).toBe(initialChild);
+
+      expect(vEl.el?.tagName).toBe("SPAN");
+      expect(vEl.el?.textContent).toBe("hello");
+    });
+
+    it("mounts a fragment with an index (Ch_8.1.4)", () => {
+      const parent = document.createElement("div");
+      const p1 = h("p");
+      const p2 = h("p")
+      mountDOM(p1, parent);
+      mountDOM(p2, parent);
+
+      // before mounting fragment node, the second item will be 'P'
+      expect(parent.childNodes.length).toBe(2);
+      expect((parent.childNodes[0] as HTMLElement).tagName).toBe("P");
+
+      const vFragment: VFragment = {
+        type: "fragment",
+        children: [h("span", {}, ["world"]), h("img", {}, [])],
+      };
+
+      mountDOM(vFragment, parent, 1);
+      expect(parent.childNodes.length).toBe(4);
+      expect((parent.childNodes[1] as HTMLElement).tagName).toBe("SPAN");
+      expect((parent.childNodes[2] as HTMLElement).tagName).toBe("IMG");
+      expect(parent.childNodes[0]).toBe(p1.el);
+      expect(parent.childNodes[3]).toBe(p2.el);
+    });
   });
 });
