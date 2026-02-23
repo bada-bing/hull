@@ -64,7 +64,7 @@ function createElementNode(
 function createFragmentNode(
   vdom: VFragment,
   parentEl: HTMLElement,
-  index: number,
+  index?: number,
 ) {
   // https://developer.mozilla.org/en-US/docs/Web/API/Document/createDocumentFragment
   vdom.el = parentEl;
@@ -142,16 +142,19 @@ function setAttributes(attributes: Attributes, domel: HTMLElement): void {
     if (typeof style === "string") {
       domel.style.cssText = style;
     } else {
+      // @ts-expect-error
       Object.entries(style).forEach(([key, val]) => (domel.style[key] = val));
     }
   }
 
   // set all other attributes
-  Object.entries(otherAttributes).forEach(([key, value]) => {
+  Object.entries(otherAttributes as Omit<Attributes, "style" | "classList">).forEach(([key, value]) => {
     if (value == null) {
+      // @ts-expect-error
       domel[key] = null;
       domel.removeAttribute(key);
     } else {
+      // @ts-expect-error
       domel[key] = value;
       domel.setAttribute(key, value);
     }

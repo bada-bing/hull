@@ -1,10 +1,5 @@
 import { destroyDOM } from "./destroy-dom";
-import {
-  ApplicationCommand,
-  Dispatcher,
-  Reducer,
-  UnsubscribeFn,
-} from "./dispatcher";
+import { Dispatcher, Reducer, UnsubscribeFn } from "./dispatcher";
 import { VNode } from "./h";
 import { mountDOM } from "./mount-dom";
 
@@ -12,8 +7,8 @@ type ApplicationState = Record<string, unknown>;
 
 export type CreateAppParams<State> = {
   state: State;
-  view: (state: State, emit: Function) => VNode;
-  reducers: Record<ApplicationCommand, Reducer<State>>;
+  view: (state: State, emit: (eventName: string, payload?: unknown) => void) => VNode;
+  reducers: Record<string, Reducer<State>>;
 };
 
 // connects dispatcher with renderer (ui management)
@@ -45,19 +40,18 @@ export function createApp<State extends ApplicationState>({
     dispatcher.registerAfterHandler(renderApp),
   ];
 
-  // TODO ❓ is it correct: event is in this scenario an applicationCommand
-  // don't confuse with browser events, this an application event
+  // don't confuse the first param with browser events, this an application event
   // read as: on click 'emit(add todo)'
   function emit(eventName: string, payload: unknown) {
     dispatcher.dispatch(eventName, payload);
   }
 
-  for (const actionCommand in reducers) {
-    const reducer = reducers[actionCommand];
+  for (const applicationCommand in reducers) {
+    const reducer = reducers[applicationCommand];
 
     // create applicationCommand handlers as wrapper functions around individual reducers
     // TODO seems that one application command, can have only one reducer associated with it
-    const subs = dispatcher.subscribe(actionCommand, (payload) => {
+    const subs = dispatcher.subscribe(applicationCommand, (payload) => {
       state = reducer(state, payload);
     });
 
