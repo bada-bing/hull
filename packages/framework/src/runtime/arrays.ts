@@ -1,4 +1,4 @@
-import { logCurrentState, logEndDiffing, logStartDiffing } from "./diff-logger";
+import { logCurrentState, logEndDiffing, logStartDiffing } from "../utils/diff-logger";
 import { VText } from "./h";
 
 export function withoutNullsOrUndefines<T>(

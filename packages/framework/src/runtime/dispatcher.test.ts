@@ -3,7 +3,7 @@ import { Dispatcher, Reducer } from "./dispatcher";
 
 type ApplicationState = { counter: number };
 
-const increaseCounter: Reducer<ApplicationState, number> = (
+const increaseCounter: Reducer<ApplicationState> = (
   currentApplicationState,
   payload,
 ) => {

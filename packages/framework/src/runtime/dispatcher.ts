@@ -1,6 +1,8 @@
 export type ApplicationCommand = string;
 
-export type Reducer<State, Payload = unknown> = (
+type Payload = any;
+
+export type Reducer<State> = (
   applicationState: Readonly<State>,
   payload: Payload,
 ) => State;
@@ -10,7 +12,7 @@ export type Reducer<State, Payload = unknown> = (
  * They are consumers: they consume the payload of an application command
  * They return nothing, but they do mutate the application state
  */
-type Handler<T = unknown> = (payload: T) => void;
+type Handler = (payload: Payload) => void;
 type AfterCommandHandler = Function;
 export type UnsubscribeFn = Function;
 

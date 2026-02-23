@@ -53,10 +53,7 @@ describe("Application instance - createApp() (Ch_5.2)", () => {
       counter: number;
     };
 
-    const increase_counter: Reducer<ApplicationState, number> = (
-      state,
-      payload,
-    ) => ({
+    const increase_counter: Reducer<ApplicationState> = (state, payload) => ({
       counter: state.counter + payload,
     });
 
@@ -100,10 +97,10 @@ describe("Application instance - createApp() (Ch_5.2)", () => {
       counter: number;
     };
 
-    const increase_counter_with_side_effect: Reducer<
-      ApplicationState,
-      number
-    > = (state, payload) => {
+    const increase_counter_with_side_effect: Reducer<ApplicationState> = (
+      state,
+      payload,
+    ) => {
       globalSideEffect += payload; // This is an intentional side effect for testing purposes
 
       return { counter: state.counter + payload };

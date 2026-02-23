@@ -1,6 +1,5 @@
 import { destroyDOM } from "./destroy-dom";
 import {
-  ApplicationCommand,
   Dispatcher,
   Reducer,
   UnsubscribeFn,
@@ -10,10 +9,13 @@ import { mountDOM } from "./mount-dom";
 
 type ApplicationState = Record<string, unknown>;
 
-export type CreateAppParams<State> = {
+export type CreateAppParams<
+  State,
+  Reducers extends Record<string, Reducer<State>>
+> = {
   state: State;
   view: (state: State, emit: Function) => VNode;
-  reducers: Record<ApplicationCommand, Reducer<State>>;
+  reducers: Reducers;
 };
 
 // connects dispatcher with renderer (ui management)
@@ -31,11 +33,14 @@ interface AppInstance {
  *
  * @returns an application instance
  */
-export function createApp<State extends ApplicationState>({
+export function createApp<
+  State extends ApplicationState,
+  Reducers extends Record<string, Reducer<State>>
+>({
   state,
   view,
   reducers,
-}: CreateAppParams<State>): AppInstance {
+}: CreateAppParams<State, Reducers>): AppInstance {
   let parentEl: HTMLElement | null = null;
   let vdom: VNode | null = null;
 
