@@ -1,4 +1,4 @@
-import { describe, test, expect } from "vitest";
+import { describe, test, expect, vi } from "vitest";
 import {
   type VElement,
   VFragment,
@@ -80,6 +80,8 @@ describe("Rendering and the Virtual DOM (Ch_3)", () => {
   });
 });
 
+const clickHandler = vi.fn();
+
 /**
  * expectedRes is a Virtual Element which resembles the following HTML structure (i.e., form DOM element with its children)
  *
@@ -117,7 +119,11 @@ const expectedRes: VElement = {
     {
       type: "element",
       tag: "button",
-      props: { on: { click: "login" } },
+      props: {
+        on: {
+          click: clickHandler,
+        },
+      },
       children: [{ type: "text", value: "Log in" }],
     },
   ],
@@ -133,7 +139,7 @@ describe("Components - h() (Ch_3.8)", () => {
   test("should create form VElement with its children and props", () => {
     inputUser = h("input", { type: "text", name: "user" });
     inputPass = h("input", { type: "text", name: "pass" });
-    buttonLogIn = h("button", { on: { click: "login" } }, ["Log in"]);
+    buttonLogIn = h("button", { on: { click: clickHandler } }, ["Log in"]);
 
     const formEl = h("form", { class: "login-form", action: "login" }, [
       inputUser,

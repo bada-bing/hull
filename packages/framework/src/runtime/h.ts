@@ -1,6 +1,24 @@
 import { withoutNullsOrUndefines } from "./arrays";
 import { Listeners } from "./mount-dom";
 
+export type CSSText = string; // e.g., 'color: red; font-family: Georgia;'
+
+export type Attributes = { [key: string]: unknown } & {
+  class?: string[] | string;
+  style?: CSSText | Record<string, string>;
+};
+
+/**
+ * @example
+ * {
+ *   class: 'header'
+ *   on: {'click' : ()=> console.log('hello')}
+ * }
+ */
+export type Props = Attributes & {
+  on?: Record<string, EventListenerOrEventListenerObject>;
+};
+
 // types of Virtual Nodes
 export const VDOM_TYPES = {
   TEXT: "text",
@@ -12,7 +30,7 @@ export interface VElement {
   el?: HTMLElement;
   listeners?: Listeners;
   tag: string;
-  props: {};
+  props: Props;
   children: VNode[];
   type: (typeof VDOM_TYPES)["ELEMENT"];
 }
@@ -52,7 +70,7 @@ export type VNode = VElement | VText | VFragment;
  */
 export function h(
   tag: string,
-  props = {},
+  props: Props = {},
   children: (string | VElement | null)[] = [],
 ): VElement {
   return {
