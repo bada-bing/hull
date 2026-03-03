@@ -1,9 +1,9 @@
-import { VElement, VFragment, VNode, VText } from "./h";
+import { Attributes, Props, VElement, VFragment, VNode, VText } from "./h";
 
 export function insert(
   el: HTMLElement | Text,
   parent: HTMLElement,
-  index?: number,
+  index?: number | null,
 ): void {
   if (index == null || index == undefined) {
     parent.append(el);
@@ -20,7 +20,7 @@ export function insert(
   }
 }
 
-export function mountDOM(vdom: VNode, parentEl: HTMLElement, index?: number) {
+export function mountDOM(vdom: VNode, parentEl: HTMLElement, index?: number | null) {
   switch (vdom.type) {
     case "text":
       createTextNode(vdom, parentEl, index);
@@ -38,7 +38,7 @@ export function mountDOM(vdom: VNode, parentEl: HTMLElement, index?: number) {
   }
 }
 
-function createTextNode(vdom: VText, parentEl: HTMLElement, index?: number) {
+function createTextNode(vdom: VText, parentEl: HTMLElement, index?: number | null) {
   const textNode = document.createTextNode(vdom.value);
   vdom.el = textNode;
 
@@ -48,7 +48,7 @@ function createTextNode(vdom: VText, parentEl: HTMLElement, index?: number) {
 function createElementNode(
   vEl: VElement,
   parentEl: HTMLElement,
-  index?: number,
+  index?: number | null,
 ) {
   const el = document.createElement(vEl.tag);
 
@@ -64,7 +64,7 @@ function createElementNode(
 function createFragmentNode(
   vdom: VFragment,
   parentEl: HTMLElement,
-  index?: number,
+  index?: number | null,
 ) {
   // https://developer.mozilla.org/en-US/docs/Web/API/Document/createDocumentFragment
   vdom.el = parentEl;
@@ -80,22 +80,6 @@ function createFragmentNode(
   );
 }
 
-type Attributes = Record<string, string> & {
-  classList?: string[] | string;
-  style?: CSSText | Record<string, string>;
-};
-
-/**
- * @example
- * {
- *   class: 'header'
- *   on: {'click' : ()=> console.log('hello')}
- * }
- */
-type Props = Attributes & {
-  on?: Record<string, EventListenerOrEventListenerObject>;
-};
-
 function addProps(domel: HTMLElement, props: Props, vdom: VElement) {
   const { on: listeners, ...attrs } = props;
   if (listeners) {
@@ -106,7 +90,7 @@ function addProps(domel: HTMLElement, props: Props, vdom: VElement) {
 
 export type Listeners = Record<string, EventListenerOrEventListenerObject>;
 
-function addEventListeners(
+export function addEventListeners(
   listeners: Listeners,
   domel: EventTarget,
 ): Listeners {
@@ -125,8 +109,7 @@ export function removeEventListeners(listeners: Listeners, domel: EventTarget) {
   });
 }
 
-type CSSText = string; // e.g., 'color: red; font-family: Georgia;'
-
+// TODO move to attributes.ts (and refactor)
 function setAttributes(attributes: Attributes, domel: HTMLElement): void {
   const { class: classList, style, ...otherAttributes } = attributes;
 
@@ -148,7 +131,7 @@ function setAttributes(attributes: Attributes, domel: HTMLElement): void {
   }
 
   // set all other attributes
-  Object.entries(otherAttributes as Omit<Attributes, "style" | "classList">).forEach(([key, value]) => {
+  Object.entries(otherAttributes as Omit<Attributes, "style" | "class">).forEach(([key, value]) => {
     if (value == null) {
       // @ts-expect-error
       domel[key] = null;
@@ -156,7 +139,7 @@ function setAttributes(attributes: Attributes, domel: HTMLElement): void {
     } else {
       // @ts-expect-error
       domel[key] = value;
-      domel.setAttribute(key, value);
+      domel.setAttribute(key, value as string);
     }
   });
 }
