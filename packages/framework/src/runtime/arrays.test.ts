@@ -147,16 +147,19 @@ describe("diffChildrenArray (Ch_7.6)", () => {
     ]);
   });
 
-  test("throws an error if the new array is empty", () => {
+  test("handles removals to an empty array", () => {
     const oldArr = ["a", "b", "c"];
-    const newArr = [];
-    expect(() => arraysDiffSequence(oldArr, newArr)).toThrow(
-      "the new array is empty!",
-    );
+    const newArr: string[] = [];
+    const result = arraysDiffSequence(oldArr, newArr);
+    expect(result).toEqual([
+      { operation: "remove", index: 0, item: "a" },
+      { operation: "remove", index: 0, item: "b" },
+      { operation: "remove", index: 0, item: "c" },
+    ]);
   });
 
   test("handles creation from empty", () => {
-    const oldArr = [];
+    const oldArr: string[] = [];
     const newArr = ["a", "b", "c"];
     const result = arraysDiffSequence(oldArr, newArr);
 

@@ -1,8 +1,8 @@
 import { objectsDiff } from "../utils/objects";
-import { arraysDiff } from "./arrays";
+import { arraysDiff, arraysDiffSequence } from "./arrays";
 import { cssTextToRecord, removeAttribute, setAttribute } from "./attributes";
 import { destroyDOM } from "./destroy-dom";
-import { VDOM_TYPES, VElement, VNode } from "./h";
+import { extractChildren, VDOM_TYPES, VElement, VFragment, VNode } from "./h";
 import { Listeners, mountDOM, addEventListeners } from "./mount-dom";
 import { areNodesEqual } from "./nodes-equal";
 
@@ -47,12 +47,16 @@ export function patchDOM<T extends VNode>(
         newNode.type === VDOM_TYPES.ELEMENT
       ) {
         patchElement(oldNode, newNode);
-        break;
+        patchChildren(oldNode, newNode);
       }
+      break;
     }
 
     case "fragment": {
-      throw new Error("not yet implemented");
+      if (oldNode.type === "fragment" && newNode.type === "fragment") {
+        patchChildren(oldNode, newNode);
+      }
+      break;
     }
   }
 
@@ -121,8 +125,8 @@ function patchEventListeners(
   const addedListeners: Record<string, EventListenerOrEventListenerObject> = {};
 
   for (const event of updated.concat(added)) {
-    el.addEventListener(event, newListeners[event])
-    addedListeners[event] = newListeners[event]
+    el.addEventListener(event, newListeners[event]);
+    addedListeners[event] = newListeners[event];
   }
 
   return addedListeners;
@@ -193,5 +197,50 @@ function patchStyle(
   for (const key of added.concat(updated)) {
     // @ts-expect-error
     el.style[key] = newStyleObj[key];
+  }
+}
+
+function patchChildren<T extends VFragment | VElement>(oldVdom: T, newVdom: T) {
+  const oldChildren = extractChildren(oldVdom);
+  const newChildren = extractChildren(newVdom);
+  const parentEl = oldVdom.el;
+
+  const diffSequence = arraysDiffSequence(
+    oldChildren,
+    newChildren,
+    areNodesEqual,
+  );
+
+  for (const diff of diffSequence) {
+    const { operation, item } = diff;
+
+    switch (operation) {
+      case "add": {
+        mountDOM(item as VNode, parentEl!, diff.index);
+        break;
+      }
+
+      case "remove": {
+        destroyDOM(item as VNode);
+        break;
+      }
+
+      case "move": {
+        const child = oldChildren[diff.originalIndex]; // i.e., original position of the child
+        const nodeAtTargetPosition = parentEl?.childNodes[diff.index];
+
+        parentEl?.insertBefore(child.el!, nodeAtTargetPosition!);
+
+        const newChild = newChildren[diff.index];
+        patchDOM(child, newChild, parentEl!);
+
+        break;
+      }
+
+      case "noop": {
+        patchDOM(oldChildren[diff.originalIndex], newChildren[diff.index], parentEl!)
+        break;
+      }
+    }
   }
 }

@@ -1,3 +1,4 @@
+import { VNode } from "../runtime/h";
 
 export const ENABLE_DIFF_LOGS = false;
 
@@ -20,8 +21,8 @@ export function logStartDiffing() {
 }
 
 export function logCurrentState(
-  currentOldArray: string[],
-  currentNewArray: string[],
+  currentOldArray: (string | VNode)[],
+  currentNewArray: (string | VNode)[],
   operations: any[],
 ) {
   log(`Steps so far: ${getPreviousStepsText(operations)}`);

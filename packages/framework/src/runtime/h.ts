@@ -71,7 +71,7 @@ export type VNode = VElement | VText | VFragment;
 export function h(
   tag: string,
   props: Props = {},
-  children: (string | VElement | null)[] = [],
+  children: (string | VNode | null)[] = [],
 ): VElement {
   return {
     type: VDOM_TYPES.ELEMENT,
@@ -89,14 +89,30 @@ export function hString(text: string): VText {
 }
 
 export function mapStringsToTextNodes(
-  nodes: (string | VElement | null)[],
-): (VText | VElement | null)[] {
+  nodes: (string | VNode | null)[],
+): (VText | VNode | null)[] {
   return nodes.map((n) => (typeof n === "string" ? hString(n) : n));
 }
 
-export function hFragment(nodes: (string | VElement | null)[]): VFragment {
+export function hFragment(nodes: (string | VNode | null)[]): VFragment {
   return {
     type: VDOM_TYPES.FRAGMENT,
     children: withoutNullsOrUndefines(mapStringsToTextNodes(nodes)),
   };
+}
+
+export function extractChildren(vdom: VElement | VFragment): VNode[] {
+  if (!vdom.children) return [];
+
+  const children: VNode[] = [];
+
+  for (const child of vdom.children) {
+    if (child.type === "fragment") {
+      children.push(...extractChildren(child));
+    } else {
+      children.push(child);
+    }
+  }
+
+  return children;
 }

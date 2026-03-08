@@ -7,6 +7,7 @@ import {
   hFragment,
   hString,
   mapStringsToTextNodes,
+  extractChildren,
 } from "./h";
 
 // Ch3 - rendering and the virtual DOM
@@ -149,5 +150,48 @@ describe("Components - h() (Ch_3.8)", () => {
     ]);
 
     expect(formEl).toEqual(expectedRes);
+  });
+});
+
+describe("extractChildren() (Ch_8.2.6)", () => {
+  test("should return an empty array for a VElement with no children", () => {
+    const vdom = h("div");
+    expect(extractChildren(vdom)).toEqual([]);
+  });
+
+  test("should extract children from a VElement", () => {
+    const children = [h("span"), hString("text")];
+    const vdom = h("div", {}, children);
+    expect(extractChildren(vdom)).toEqual(vdom.children);
+  });
+
+  test("should flatten fragment children", () => {
+    const grandChildren = [h("i"), hString("text")];
+    const fragment = hFragment(grandChildren);
+    const vdom = h("div", {}, [h("span"), fragment]);
+
+    const extracted = extractChildren(vdom);
+    expect(extracted).toEqual([h("span"), h("i"), hString("text")]);
+  });
+
+  test("should handle nested fragments", () => {
+    const greatGrandChildren = [h("b"), hString("bold")];
+    const nestedFragment = hFragment(greatGrandChildren);
+    const fragment = hFragment([h("i"), nestedFragment]);
+    const vdom = h("div", {}, [h("span"), fragment]);
+
+    const extracted = extractChildren(vdom);
+    expect(extracted).toEqual([
+      h("span"),
+      h("i"),
+      h("b"),
+      hString("bold"),
+    ]);
+  });
+
+  test("should extract children from a VFragment", () => {
+    const children = [h("span"), hString("text")];
+    const vdom = hFragment(children);
+    expect(extractChildren(vdom)).toEqual(vdom.children);
   });
 });
