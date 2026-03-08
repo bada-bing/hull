@@ -1,5 +1,5 @@
 import { logCurrentState, logEndDiffing, logStartDiffing } from "../utils/diff-logger";
-import { VText } from "./h";
+import { VNode, VText } from "./h";
 
 export function withoutNullsOrUndefines<T>(
   nodes: (T | null | undefined)[],
@@ -34,12 +34,12 @@ export function arraysDiff(a: string[], b: string[]): Diff {
 }
 
 type Operation =
-  | { operation: "remove"; item: string; index: number }
-  | { operation: "noop"; item: string; originalIndex: number; index: number }
-  | { operation: "add"; item: string; index: number }
+  | { operation: "remove"; item: string | VNode; index: number }
+  | { operation: "noop"; item: string | VNode; originalIndex: number; index: number }
+  | { operation: "add"; item: string | VNode; index: number }
   | {
       operation: "move";
-      item: string;
+      item: string | VNode;
       originalIndex: number;
       from: number;
       index: number;
@@ -57,7 +57,7 @@ type Operation =
  * @param newArray
  * @returns sequence of operation
  */
-export function arraysDiffSequence<T extends string>(
+export function arraysDiffSequence<T extends string | VNode>(
   oldArray: T[],
   newArray: T[],
   equalsFn = (a: T, b: T) => a === b,
@@ -68,9 +68,6 @@ export function arraysDiffSequence<T extends string>(
   const currentState = new ArrayWithOriginalIndices(oldArray, equalsFn);
 
   logCurrentState(currentState.array, newArray, listOfOperations);
-
-  //TODO confirm: this is a temporary fix for an implementation error of the algorithm from the book
-  if (newArray.length < 1) throw new Error("the new array is empty!");
 
   // iterate through indices of newArray,
   // in each iteration reconcile the current item in old array with the item in new array
@@ -137,7 +134,7 @@ export function arraysDiffSequence<T extends string>(
  * actively moved (a MOVE operation) and an item that just shifted forwards or backwards
  * because other items were added or removed around it (a NOOP operation).
  */
-class ArrayWithOriginalIndices<T extends string> {
+class ArrayWithOriginalIndices<T extends string | VNode> {
   #array: T[]; // array that gets modified
   #orignalIndices: number[]; // stays in sync with the 'array' but keeps track of the original indices
   #equalsFn: (a: T, b: T) => boolean;
