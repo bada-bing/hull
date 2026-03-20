@@ -101,6 +101,20 @@ export function hFragment(nodes: (string | VNode | null)[]): VFragment {
   };
 }
 
+/**
+ * The function's main purpose is to traverse a virtual node's children and produce a "flattened" list of VNodes
+ * that corresponds one-to-one with the actual child nodes in the DOM.
+ * 
+ * It translates the nested virtual hierarchy into a flat list of VNodes that matches the structure of the real DOM. 
+ * 
+ * Since fragments don't create a DOM element themselves, 
+ * this function recursively "unwraps" them to find the VNodes that will actually be rendered as DOM nodes.
+ * 
+ * A more precise name would be `extractRenderableDescendantVNodes` or `extractRenderableChildren`
+ * 
+ * @param vdom 
+ * @returns list of VNodes whose el properties will be direct children of the parent VNode's el in the DOM
+ */
 export function extractChildren(vdom: VElement | VFragment): VNode[] {
   if (!vdom.children) return [];
 
