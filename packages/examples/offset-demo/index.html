@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Stateful Offset Demo</title>
+         <script type="module" src="main.ts"></script>
+         <style>
+             body { font-family: sans-serif; padding: 20px; max-width: 600px; }
+             .box { border: 1px solid #ccc; padding: 10px; margin-top: 20px; }
+             ul { background: #f9f9f9; padding: 10px 10px 10px 30px; border-radius: 4px; }
+             li { margin: 4px 0; }
+             .stateless { color: blue; }
+             .stateful { color: green; font-weight: bold; }
+             .static { color: #555; }
+         </style>
+    </head>
+    <body>
+        <h1>Offset Demo</h1>
+        <p>This example demonstrates why Stateful components returning Fragments require the `offset` concept during Virtual DOM patching.</p>
+        
+        <div class="box">
+            <h2>The App Container</h2>
+            <!-- The Hull app will mount into this element -->
+            <div id="app"></div>
+        </div>
+    </body>
+</html>
