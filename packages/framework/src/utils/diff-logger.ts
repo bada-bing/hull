@@ -17,6 +17,7 @@ function logSeparator() {
 }
 
 export function logStartDiffing() {
+  log("====================");
   log("Start Diffing");
 }
 

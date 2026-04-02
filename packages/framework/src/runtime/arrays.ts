@@ -1,4 +1,8 @@
-import { logCurrentState, logEndDiffing, logStartDiffing } from "../utils/diff-logger";
+import {
+  logCurrentState,
+  logEndDiffing,
+  logStartDiffing,
+} from "../utils/diff-logger";
 import { VNode, VText } from "./h";
 
 export function withoutNullsOrUndefines<T>(
@@ -35,7 +39,12 @@ export function arraysDiff(a: string[], b: string[]): Diff {
 
 type Operation =
   | { operation: "remove"; item: string | VNode; index: number }
-  | { operation: "noop"; item: string | VNode; originalIndex: number; index: number }
+  | {
+      operation: "noop";
+      item: string | VNode;
+      originalIndex: number;
+      index: number;
+    }
   | { operation: "add"; item: string | VNode; index: number }
   | {
       operation: "move";
@@ -86,7 +95,7 @@ export function arraysDiffSequence<T extends string | VNode>(
         listOfOperations.push(noop);
       } else {
         // if newArray doesn't include the 'oldItem', it needs to be removed
-        if (!newArray.includes(oldItem)) {
+        if (!newArray.some((item) => equalsFn(item, oldItem))) {
           const removeOp = currentState.removeItem(idx);
           listOfOperations.push(removeOp);
           idx--; // start again from idx, without iterating (because newItem didn't change, but oldItem did)
@@ -95,8 +104,8 @@ export function arraysDiffSequence<T extends string | VNode>(
         }
 
         // if items are different, and oldArray includes new Item -> it means that item moved
-        if (currentState.array.includes(newItem, idx + 1)) {
-          const moveOperation = currentState.moveItem(newItem, idx)
+        if (currentState.getFromIndex(newItem, idx + 1) > -1) {
+          const moveOperation = currentState.moveItem(newItem, idx);
           listOfOperations.push(moveOperation);
         } else {
           // if the items are different, and the oldArray doesn't include the new Item, it means the item is added
@@ -109,7 +118,7 @@ export function arraysDiffSequence<T extends string | VNode>(
   }
 
   while (currentState.array.length > newArray.length) {
-    const removeOp = currentState.removeItem(newArray.length)
+    const removeOp = currentState.removeItem(newArray.length);
     listOfOperations.push(removeOp);
     logCurrentState(currentState.array, newArray, listOfOperations);
   }
@@ -217,9 +226,9 @@ class ArrayWithOriginalIndices<T extends string | VNode> {
     this.#array.splice(toIndex, 0, item); // insert into new position
 
     // keep position and length of #originalIndices in sync with #array
-    const [originalIndex] = this.#orignalIndices.splice(fromIndex, 1)
-    this.#orignalIndices.splice(toIndex, 0, originalIndex)
+    const [originalIndex] = this.#orignalIndices.splice(fromIndex, 1);
+    this.#orignalIndices.splice(toIndex, 0, originalIndex);
 
-    return moveOperation
+    return moveOperation;
   }
 }
