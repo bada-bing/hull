@@ -143,7 +143,7 @@ function todosList(
       },
       [text],
     );
-  const doneButton = h("button", {
+  const doneButton = () => h("button", {
     on: {
       click: (event) => {
         const liElement = (event.target as HTMLButtonElement)!.parentElement as HTMLLIElement;
@@ -153,7 +153,7 @@ function todosList(
       }
     }
   }, ["Done"]);
-  const saveButton = h(
+  const saveButton = () => h(
     "button",
     {
       on: {
@@ -164,7 +164,7 @@ function todosList(
     },
     ["Save"],
   );
-  const cancelButton = h("button", {
+  const cancelButton = () => h("button", {
     on: {
       click: (event) => emit("cancel-update-todo")
     }
@@ -193,12 +193,11 @@ function todosList(
 
     const children = [content];
     if (state.edit !== null && state.edit.idx === itemIdx) {
-      children.push(saveButton, cancelButton);
+      children.push(saveButton(), cancelButton());
     } else {
-      children.push(doneButton);
+      children.push(doneButton());
     }
-    // } else {
-    //   children.push(saveButton, cancelButton);
+
 
     return h("li", {}, children);
   };
