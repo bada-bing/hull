@@ -2,12 +2,16 @@ import { destroyDOM } from "./destroy-dom";
 import { Dispatcher, Reducer, UnsubscribeFn } from "./dispatcher";
 import { VNode } from "./h";
 import { mountDOM } from "./mount-dom";
+import { patchDOM } from "./patch-dom";
 
 type ApplicationState = Record<string, unknown>;
 
 export type CreateAppParams<State> = {
   state: State;
-  view: (state: State, emit: (eventName: string, payload?: unknown) => void) => VNode;
+  view: (
+    state: State,
+    emit: (eventName: string, payload?: unknown) => void,
+  ) => VNode;
   reducers: Record<string, Reducer<State>>;
 };
 
@@ -37,6 +41,7 @@ export function createApp<State extends ApplicationState>({
   const dispatcher = new Dispatcher();
 
   const subscriptions: UnsubscribeFn[] = [
+    // every time the dispatcher dispatches an applicationCommand (i.e., when state changes) the view is updated as an after-effect
     dispatcher.registerAfterHandler(renderApp),
   ];
 
@@ -59,17 +64,18 @@ export function createApp<State extends ApplicationState>({
   }
 
   // render the view -> convert virtual DOM into DOM
+  // the function is called when the state changes
   function renderApp() {
-    if (vdom) destroyDOM(vdom);
-
-    vdom = view(state, emit);
-    if (parentEl) mountDOM(vdom, parentEl);
+    const newVdom = view(state, emit);
+    vdom = patchDOM(vdom as VNode, newVdom, parentEl as HTMLElement);
   }
 
   return {
     mount(_parentEl: HTMLElement) {
       parentEl = _parentEl;
-      renderApp();
+      vdom = view(state, emit);
+
+      mountDOM(vdom, parentEl);
     },
 
     unmount() {

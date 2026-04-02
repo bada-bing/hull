@@ -157,6 +157,11 @@ function patchClasses(
 
   el.classList.remove(...removed);
   el.classList.add(...added);
+
+  if (el.classList.length === 0) {
+    // remove the HTML attribute - otherwise it remains in the HTML as `class=""`
+    el.removeAttribute("class");
+  }
 }
 
 function toClassList(oldClassList: string | string[] | undefined): string[] {
@@ -238,7 +243,11 @@ function patchChildren<T extends VFragment | VElement>(oldVdom: T, newVdom: T) {
       }
 
       case "noop": {
-        patchDOM(oldChildren[diff.originalIndex], newChildren[diff.index], parentEl!)
+        patchDOM(
+          oldChildren[diff.originalIndex],
+          newChildren[diff.index],
+          parentEl!,
+        );
         break;
       }
     }
