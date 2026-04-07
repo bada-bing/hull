@@ -1,3 +1,4 @@
+import { hasOwnProperty } from "../utils/objects";
 import { destroyDOM } from "./destroy-dom";
 import { extractChildren, VNode } from "./h";
 import { mountDOM } from "./mount-dom";
@@ -5,8 +6,10 @@ import { patchDOM } from "./patch-dom";
 
 type ApplicationState = Record<string, unknown>;
 
-export type GenericComponentInstance = ComponentInstance<Record<string, unknown>, Record<string, unknown>>
-
+export type GenericComponentInstance = ComponentInstance<
+  Record<string, unknown>,
+  Record<string, unknown>
+>;
 
 // TODO clarify typeof Component vs Component as return type
 
@@ -29,6 +32,7 @@ export function defineComponent<
 >({
   viewFunction,
   initialState,
+  ...componentMethods
 }: {
   // ComponentInstance interface ensures that `this` will have required properties when viewFunction() is called
   viewFunction: (this: ComponentInstance<TProps, TApplicationState>) => VNode;
@@ -131,6 +135,12 @@ export function defineComponent<
       this.#isMounted = false;
     }
   }
+
+  for (const method in componentMethods) {
+    if (hasOwnProperty(Component.prototype, method))
+      throw new Error(`Method "${method}" already exists in the component`);
+  }
+  Object.assign(Component.prototype, componentMethods);
 
   return Component;
 }

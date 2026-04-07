@@ -33,3 +33,16 @@ export function objectsDiff(a: Record<string, unknown>, b: Record<string, unknow
     updated,
   };
 }
+
+/**
+ * check direct (own) properties of an object (ignores properties from its prototype)
+ * 
+ * It is a safe wrapper around `Object.prototype.hasOwnProperty()`.
+ * This is a defensive pattern in case the object overrides `hasOwnProperty`
+ * or does not inherit from `Object.prototype`.
+ */
+export function hasOwnProperty(obj: Object, prop: string) {
+  // Functions are objects, and have their own methods, e.g., call()
+  // call method invokes the function and explicitly sets `this`: fn.call(thisValue, arg1, arg2, ...)
+  return Object.prototype.hasOwnProperty.call(obj, prop)
+}
