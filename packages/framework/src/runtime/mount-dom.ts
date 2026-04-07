@@ -1,4 +1,5 @@
 import { Attributes, Props, VElement, VFragment, VNode, VText } from "./h";
+import { addEventListener, Listeners } from "./event-listeners";
 
 export function insert(
   el: HTMLElement | Text,
@@ -88,8 +89,6 @@ function addProps(domel: HTMLElement, props: Props, vdom: VElement) {
   setAttributes(attrs, domel);
 }
 
-export type Listeners = Record<string, EventListenerOrEventListenerObject>;
-
 export function addEventListeners(
   listeners: Listeners,
   domel: EventTarget,
@@ -97,8 +96,8 @@ export function addEventListeners(
   const addedEventListeners: Listeners = {};
 
   Object.entries(listeners).forEach(([type, handler]) => {
-    domel.addEventListener(type, handler);
-    addedEventListeners[type] = handler;
+    const registeredHandler = addEventListener(type, handler, domel);
+    addedEventListeners[type] = registeredHandler;
   });
   return addedEventListeners;
 }

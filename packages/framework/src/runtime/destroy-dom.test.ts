@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Listeners, mountDOM } from "./mount-dom";
+import { mountDOM } from "./mount-dom";
+import { Listeners } from "./event-listeners";
 import { destroyDOM } from "./destroy-dom";
 import { h, VFragment, VText } from "./h";
 

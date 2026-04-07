@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { h, hString, VElement, VFragment, VText } from "./h";
-import { Listeners, mountDOM, insert } from "./mount-dom";
+import { mountDOM, insert } from "./mount-dom";
+import { Listeners } from "./event-listeners";
 
 // Ch4 - Mounting the virtual DOM
 describe("Mounting virtual DOM (Ch_4.1)", () => {

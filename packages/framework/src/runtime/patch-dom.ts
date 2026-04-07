@@ -4,7 +4,8 @@ import { cssTextToRecord, removeAttribute, setAttribute } from "./attributes";
 import { GenericComponentInstance } from "./component";
 import { destroyDOM } from "./destroy-dom";
 import { extractChildren, VDOM_TYPES, VElement, VFragment, VNode } from "./h";
-import { Listeners, mountDOM } from "./mount-dom";
+import { mountDOM } from "./mount-dom";
+import { Listeners } from "./event-listeners";
 import { areNodesEqual } from "./nodes-equal";
 
 

@@ -1,5 +1,5 @@
 import { withoutNullsOrUndefines } from "./arrays";
-import { Listeners } from "./mount-dom";
+import { Listeners } from "./event-listeners";
 
 export type CSSText = string; // e.g., 'color: red; font-family: Georgia;'
 
