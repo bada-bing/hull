@@ -1,5 +1,6 @@
 import { Attributes, Props, VElement, VFragment, VNode, VText } from "./h";
 import { addEventListener, Listeners } from "./event-listeners";
+import { GenericComponentInstance } from "./component";
 
 export function insert(
   el: HTMLElement | Text,
@@ -21,16 +22,21 @@ export function insert(
   }
 }
 
-export function mountDOM(vdom: VNode, parentEl: HTMLElement, index?: number | null) {
+export function mountDOM(
+  vdom: VNode,
+  parentEl: HTMLElement,
+  index?: number | null,
+  hostComponent: GenericComponentInstance | null = null,
+) {
   switch (vdom.type) {
     case "text":
       createTextNode(vdom, parentEl, index);
       break;
     case "element":
-      createElementNode(vdom, parentEl, index);
+      createElementNode(vdom, parentEl, index, hostComponent);
       break;
     case "fragment":
-      createFragmentNode(vdom, parentEl, index);
+      createFragmentNode(vdom, parentEl, index, hostComponent);
       break;
     default:
       // exhaustiveness checking ensures that all vdom.type options are covered
@@ -39,7 +45,11 @@ export function mountDOM(vdom: VNode, parentEl: HTMLElement, index?: number | nu
   }
 }
 
-function createTextNode(vdom: VText, parentEl: HTMLElement, index?: number | null) {
+function createTextNode(
+  vdom: VText,
+  parentEl: HTMLElement,
+  index?: number | null,
+) {
   const textNode = document.createTextNode(vdom.value);
   vdom.el = textNode;
 
@@ -50,12 +60,13 @@ function createElementNode(
   vEl: VElement,
   parentEl: HTMLElement,
   index?: number | null,
+  hostComponent: GenericComponentInstance | null = null,
 ) {
   const el = document.createElement(vEl.tag);
 
-  addProps(el, vEl.props, vEl);
+  addProps(el, vEl.props, vEl, hostComponent);
 
-  vEl.children.forEach((c) => mountDOM(c, el));
+  vEl.children.forEach((c) => mountDOM(c, el, null, hostComponent));
 
   vEl.el = el;
 
@@ -66,6 +77,7 @@ function createFragmentNode(
   vdom: VFragment,
   parentEl: HTMLElement,
   index?: number | null,
+  hostComponent: GenericComponentInstance | null = null,
 ) {
   // https://developer.mozilla.org/en-US/docs/Web/API/Document/createDocumentFragment
   vdom.el = parentEl;
@@ -77,26 +89,35 @@ function createFragmentNode(
       child,
       parentEl,
       index !== null && index !== undefined ? index + offset : undefined,
+      hostComponent,
     ),
   );
 }
 
-function addProps(domel: HTMLElement, props: Props, vdom: VElement) {
+// todo this function is called `addProps` but when patching is called `patchAttributes`
+function addProps(
+  domel: HTMLElement,
+  props: Props,
+  vdom: VElement,
+  hostComponent: GenericComponentInstance | null = null,
+) {
   const { on: listeners, ...attrs } = props;
   if (listeners) {
-    vdom.listeners = addEventListeners(listeners, domel);
+    vdom.listeners = addEventListeners(listeners, domel, hostComponent);
   }
   setAttributes(attrs, domel);
 }
 
+// TODO add hostComponent
 export function addEventListeners(
   listeners: Listeners,
   domel: EventTarget,
+  hostComponent: GenericComponentInstance | null = null
 ): Listeners {
   const addedEventListeners: Listeners = {};
 
   Object.entries(listeners).forEach(([type, handler]) => {
-    const registeredHandler = addEventListener(type, handler, domel);
+    const registeredHandler = addEventListener(type, handler, domel, hostComponent);
     addedEventListeners[type] = registeredHandler;
   });
   return addedEventListeners;
@@ -130,7 +151,9 @@ function setAttributes(attributes: Attributes, domel: HTMLElement): void {
   }
 
   // set all other attributes
-  Object.entries(otherAttributes as Omit<Attributes, "style" | "class">).forEach(([key, value]) => {
+  Object.entries(
+    otherAttributes as Omit<Attributes, "style" | "class">,
+  ).forEach(([key, value]) => {
     if (value == null) {
       // @ts-expect-error
       domel[key] = null;
@@ -138,6 +161,7 @@ function setAttributes(attributes: Attributes, domel: HTMLElement): void {
     } else {
       // @ts-expect-error
       domel[key] = value;
+      // TODO should us use setAttribute from ./attributes.ts
       domel.setAttribute(key, value as string);
     }
   });

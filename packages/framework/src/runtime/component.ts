@@ -93,7 +93,7 @@ export function defineComponent<
     }
 
     render(): VNode {
-      // Because JS modules automatically run in "strict mode," 
+      // Because JS modules automatically run in "strict mode,"
       // any function called without an explicit this context (not as a method of an object)
       // will have this set to undefined.
 
@@ -120,7 +120,7 @@ export function defineComponent<
       if (this.#isMounted) throw new Error("Component is already mounted!");
 
       this.#vdom = this.render();
-      mountDOM(this.#vdom, hostEl, index);
+      mountDOM(this.#vdom, hostEl, index, this);
 
       this.#isMounted = true;
       this.#hostEl = hostEl;

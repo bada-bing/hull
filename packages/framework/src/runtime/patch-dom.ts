@@ -5,7 +5,7 @@ import { GenericComponentInstance } from "./component";
 import { destroyDOM } from "./destroy-dom";
 import { extractChildren, VDOM_TYPES, VElement, VFragment, VNode } from "./h";
 import { mountDOM } from "./mount-dom";
-import { Listeners } from "./event-listeners";
+import { addEventListener, Listeners } from "./event-listeners";
 import { areNodesEqual } from "./nodes-equal";
 
 
@@ -50,8 +50,8 @@ export function patchDOM<T extends VNode, C extends GenericComponentInstance>(
         oldNode.type === VDOM_TYPES.ELEMENT &&
         newNode.type === VDOM_TYPES.ELEMENT
       ) {
-        patchElement(oldNode, newNode);
-        patchChildren(oldNode, newNode);
+        patchElement(oldNode, newNode, hostComponent);
+        patchChildren(oldNode, newNode, hostComponent);
       }
       break;
     }
@@ -84,7 +84,7 @@ function patchText(textNode: Text, newValue: string) {
   if (textNode.nodeValue !== newValue) textNode.nodeValue = newValue;
 }
 
-function patchElement(oldElement: VElement, newElement: VElement) {
+function patchElement(oldElement: VElement, newElement: VElement, hostComponent: GenericComponentInstance | null = null) {
   const {
     class: oldClasses,
     style: oldStyle,
@@ -108,11 +108,13 @@ function patchElement(oldElement: VElement, newElement: VElement) {
   patchAttributes(newElement.el, oldAttributes, newAttributes);
   patchClasses(newElement.el, oldClasses, newClasses);
   patchStyle(newElement.el, oldStyle, newStyle);
+
   newElement.listeners = patchEventListeners(
     newElement.el,
     oldEventListeners,
     oldAttachedListeners,
     newEventListeners,
+    hostComponent
   );
 }
 
@@ -121,6 +123,7 @@ function patchEventListeners(
   oldListeners: Record<string, EventListenerOrEventListenerObject> = {},
   attachedListeners: Listeners = {},
   newListeners: Record<string, EventListenerOrEventListenerObject> = {},
+  hostComponent: GenericComponentInstance | null = null
 ): Record<string, EventListenerOrEventListenerObject> {
   const { added, updated, removed } = objectsDiff(oldListeners, newListeners);
 
@@ -131,9 +134,11 @@ function patchEventListeners(
   const addedListeners: Record<string, EventListenerOrEventListenerObject> = {};
 
   for (const event of updated.concat(added)) {
-    el.addEventListener(event, newListeners[event]);
-    addedListeners[event] = newListeners[event];
+    const registeredListener = addEventListener(event, newListeners[event], el, hostComponent);
+    addedListeners[event] = registeredListener;
   }
+
+  console.log("changed listeners", addedListeners);
 
   return addedListeners;
 }
@@ -231,7 +236,7 @@ function patchChildren<T extends VFragment | VElement, C extends GenericComponen
 
     switch (operation) {
       case "add": {
-        mountDOM(item as VNode, parentEl!, diff.index+offset);
+        mountDOM(item as VNode, parentEl!, diff.index+offset, hostComponent);
         break;
       }
 
